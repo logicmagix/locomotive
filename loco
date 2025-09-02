@@ -203,12 +203,12 @@ launch() {
 
 local -a args=()
 if [[ "${STEAM_CMD[0]}" == "steam" ]]; then
-  args=(-silent -forcedesktopscaling=1.5 "steam://rungameid/${appid}")
+  args=(-silent -forcedesktopscaling=1 "steam://rungameid/${appid}")
   nohup "${STEAM_CMD[@]}" "${args[@]}" >/tmp/locomotive-launch.log 2>&1 &
 else
   # Flatpak: propagate scaling via envs
   args=(-silent "steam://rungameid/${appid}")
-  nohup env STEAM_FORCE_DESKTOPUI_SCALING=1.5 GDK_SCALE=1 GDK_DPI_SCALE=1 "${STEAM_CMD[@]}" "${args[@]}" >/tmp/locomotive-launch.log 2>&1 &
+  nohup env STEAM_FORCE_DESKTOPUI_SCALING=1 GDK_SCALE=1 GDK_DPI_SCALE=1 "${STEAM_CMD[@]}" "${args[@]}" >/tmp/locomotive-launch.log 2>&1 &
 fi
 echo "Checking tickets... AppID for $game_name is $appid"
 echo "Itinerary written to /tmp/locomotive-launch.log"
