@@ -1,0 +1,288 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2155
+
+
+# === Truncate Log ===
+: > /tmp/locomotive-debug.log
+: > /tmp/locomotive-launch.log
+
+# === Header ===
+
+
+cat <<'EOF'
+================================================
+
+    ░█░░░█▀█░█▀▀░█▀█░█▄█░█▀█░▀█▀░▀█▀░█░█░█▀▀    
+    ░█░░░█░█░█░░░█░█░█░█░█░█░░█░░░█░░▀▄▀░█▀▀    
+    ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░░▀░░▀▀▀    
+
+================================================
+EOF
+
+echo "            == CLI STEAM LAUNCHER =="
+echo "
+          Press ENTER for Library menu.
+              Enter game # to start.
+                 Enter q to quit.
+================================================"
+echo
+
+# === Error handling ===
+
+set -euo pipefail
+
+# === Make unmatched globs vanish ===
+
+shopt -s nullglob
+
+# === Global menu structures ===
+
+declare -ga titles=()
+declare -gA ID=()
+declare -ga STEAM_CMD=()
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# === Choose native Steam or Flatpak ===
+
+steam_cmd() {
+  if have steam; then
+    STEAM_CMD=(steam)
+    return
+  fi
+  if have flatpak && flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
+    STEAM_CMD=(flatpak run com.valvesoftware.Steam)
+    return
+  fi
+  echo "Error: Steam not found (native or flatpak)" >&2
+  exit 1
+}
+
+# === Determine Steam directory ===
+
+get_steam_dir() {
+  if have steam; then
+    for p in "$HOME/.steam/steam" "$HOME/.local/share/Steam" ; do
+      [[ -d "$p" ]] && { echo "$p"; return; }
+    done
+  fi
+
+  if have flatpak; then
+    for p in \
+      "$HOME/.var/app/com.valvesoftware.Steam/data/Steam" \
+      "$HOME/.var/app/com.valvesoftware.Steam/.local/share/Steam" \
+      "$HOME/.var/app/com.valvesoftware.Steam/.steam/steam"
+    do
+      [[ -d "$p" ]] && { echo "$p"; return; }
+    done
+  fi
+
+  echo "Error: Unable to determine Steam directory" >&2
+  exit 1
+}
+
+# === Determine paths ===
+
+get_library_paths() {
+  local vdf_file="$1/steamapps/libraryfolders.vdf"
+  if [[ ! -f "$vdf_file" ]]; then
+    echo "Error: libraryfolders.vdf not found at $vdf_file" >&2
+    exit 1
+  fi
+  awk -F'"' '/"[Pp][Aa][Tt][Hh]"/ { if ($4 != "") print $4 }
+' "$vdf_file"
+}
+
+# === Build game library ===
+
+build_games_list() {
+  local steam_dir
+  steam_dir="$(get_steam_dir)"
+  titles=()
+  ID=()
+  local -a paths=()
+  readarray -t paths < <(get_library_paths "$steam_dir")
+  declare -A games_map=()
+  local path app_dir manifest appid name
+  # Known non-game AppIDs (Proton, Steam Linux Runtime, Steamworks Common)
+  local -a non_games=(
+1493710 
+1391110 
+1391112 
+3658110
+961940
+858280
+1113280
+1054830
+1245040
+1420170
+1580130
+1887720
+2348590
+2805730
+1161040
+2180100
+1070560
+1628350
+1826330)
+  if [[ -f "$HOME/.config/loco/non_games.conf" ]]; then
+    if [[ -r "$HOME/.config/loco/non_games.conf" ]]; then
+      local -a extra=()
+      mapfile -t extra < "$HOME/.config/loco/non_games.conf"
+      # Validate each entry as an integer
+      for appid in "${extra[@]}"; do
+        if [[ "$appid" =~ ^[0-9]+$ ]]; then
+          non_games+=("$appid")
+        else
+          echo "Warning: Invalid AppID '$appid' in $HOME/.config/loco/non_games.conf, skipping" >> /tmp/locomotive-debug.log
+        fi
+      done
+      echo "Loaded ${#extra[@]} AppIDs from $HOME/.config/loco/non_games.conf" >> /tmp/locomotive-debug.log
+    else
+      echo "Warning: $HOME/.config/loco/non_games.conf exists but is not readable" >> /tmp/locomotive-debug.log
+    fi
+  fi
+  for path in "${paths[@]}"; do
+    app_dir="$path/steamapps"
+    [[ -d "$app_dir" ]] || continue
+    for manifest in "$app_dir"/appmanifest_*.acf; do
+      [[ -f "$manifest" ]] || continue
+      appid="$(awk -F'"' '/"appid"/ {print $4; exit}' "$manifest")"
+      name="$(awk -F'"' '/"name"/ {print $4; exit}' "$manifest")"
+      if [[ -n "${appid:-}" && -n "${name:-}" ]]; then
+        if [[ ! " ${non_games[*]} " =~ " $appid " && ! "$name" =~ [Ss][Tt][Ee][Aa][Mm][Ww][Oo][Rr][Kk][Ss] ]]; then
+          games_map["$name"]="$appid"
+        fi
+      fi
+    done
+  done
+
+# === Sort names alphabetically ===
+
+local -a sorted_names=()
+while IFS= read -r line; do
+  sorted_names+=("$line")
+done < <(LC_ALL=C printf '%s\n' "${!games_map[@]}" | sort)
+
+# === Build titles and ID ===
+
+local i=1
+for name in "${sorted_names[@]}"; do
+  titles+=("$i. $name")
+  ID["$i"]="${games_map[$name]}"
+  ((i++))
+done
+
+  if [[ ${#titles[@]} -eq 0 ]]; then
+    echo "Error: No installed games found after filtering" >&2
+    exit 1
+  fi
+echo "Built library with ${#titles[@]} entries" >> /tmp/loco-debug.log
+}
+
+# === Launch ===
+
+launch() {
+  local appid="$1"
+  steam_cmd
+
+local -a args=()
+if [[ "${STEAM_CMD[0]}" == "steam" ]]; then
+  args=(-silent -forcedesktopscaling=1.5 "steam://rungameid/${appid}")
+  nohup "${STEAM_CMD[@]}" "${args[@]}" >/tmp/locomotive-launch.log 2>&1 &
+else
+  # Flatpak: propagate scaling via envs
+  args=(-silent "steam://rungameid/${appid}")
+  nohup env STEAM_FORCE_DESKTOPUI_SCALING=1.5 GDK_SCALE=1 GDK_DPI_SCALE=1 "${STEAM_CMD[@]}" "${args[@]}" >/tmp/locomotive-launch.log 2>&1 &
+fi
+echo "Checking tickets... AppID for $game_name is $appid"
+echo "Itinerary written to /tmp/locomotive-launch.log"
+}
+
+# === Menu (less) ===
+
+display_menu() {
+  {
+    # === Library header ===
+
+    cat <<'EOF'
+================================================
+                                      <<<<oooooo
+                                     <<_________
+ o  o  o  Choo Choo  o  o O  O         II    II 
+____ ,_________ ,_____  ____    O      II    II 
+...| |........| |.,.,.\_|[]|_'__Y    __II____II_
+.I.|_|I.I.I.I.|_|.I.I.I.|__|_|II|}   I..........
+=00==/00/==/00/=00--00==00--000\\==/==/==/==/==/
+/==/==/==/==/==/==/==/==/==/==/==/==/==/==/==/==
+                                                
+================================================
+EOF
+    echo "            == GAME LIBRARY MENU =="
+    echo "
+  Browse your game library with less commands 
+              (SPACE/b or j/k). 
+         Enter q then game # to start
+            Enter q again to quit
+================================================"
+    echo
+    for line in "${titles[@]}"; do printf '%s\n' "$line"; done
+  } | less -R -X
+}
+
+# === Build the games list dynamically ===
+
+build_games_list
+
+# === Prompt for game selection with loop to handle Enter ===
+
+choice=""
+while true; do
+  if [[ -n "${choice:-}" ]]; then
+    read -rp "Make a selection (Enter = reuse $choice): " input
+    [[ -z "${input:-}" ]] && input="$choice"
+  else
+    read -rp "Make a selection (q to quit): " input
+  fi  
+  if [[ -z "${input:-}" ]]; then
+    display_menu
+    continue
+  fi
+  choice="$input"
+  if [[ "$choice" =~ ^[qQ]$ ]]; then
+    echo "Last stop. Goodbye!"
+    exit 0
+  elif [[ ! "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#titles[@]} )); then
+    echo "Invalid selection, try again." >&2
+    continue
+  fi
+  break
+done
+
+# === Get AppID ===
+
+appid="${ID[$choice]:-}"
+if [[ -z "$appid" ]]; then
+  echo "No APPID found for selection $choice" >&2
+  exit 1
+fi
+
+# === Debug log ===
+{
+  echo "Choice: $choice"
+  echo "Raw title: ${titles[$((choice-1))]}"
+  echo "Steam cmd: ${STEAM_CMD[*]}"
+  echo "Steam dir: $(get_steam_dir)"
+} >> /tmp/locomotive-debug.log
+
+# === Get game name; strip leading number and dot ===
+
+game_name="${titles[$((choice-1))]}"
+game_name="${game_name#[0-9]*. }"
+echo "Stripped game_name: $game_name" >> /tmp/locomotive-debug.log
+
+# === Launch the game ===
+
+launch "$appid"
+echo "Locomotive steam engine is running.. Choo Choo! Next stop: $game_name"
+
