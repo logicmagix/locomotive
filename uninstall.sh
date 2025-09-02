@@ -23,21 +23,21 @@ All aboard for departure! Removing loco from ~/.local/bin and /usr/local/bin
 EOF
 
 # === Remove ~/.local/bin/loco ===
-log "Clearing tracks at ~/.local/bin/loco..."
-if [[ -f "$HOME/.local/bin/loco" ]]; then
-  if rm "$HOME/.local/bin/loco"; then
-    log "Removed $HOME/.local/bin/loco"
+log "Clearing tracks at ~/.local/bin/locomotive..."
+if [[ -f "$HOME/.local/bin/locomotive" ]]; then
+  if rm "$HOME/.local/bin/locomotive"; then
+    log "Removed $HOME/.local/bin/locomotive"
   else
-    log "Error: Failed to remove $HOME/.local/bin/loco"
+    log "Error: Failed to remove $HOME/.local/bin/locomotive"
     exit 1
   fi
 else
-  log "Note: $HOME/.local/bin/loco not found, skipping"
+  log "Note: $HOME/.local/bin/locomotive not found, skipping"
 fi
 
 # === Remove /usr/local/bin/loco wrapper ===
-log "Dismantling station at /usr/local/bin/loco..."
-WRAPPER="/usr/local/bin/loco"
+log "Dismantling station at /usr/local/bin/locomotive..."
+WRAPPER="/usr/local/bin/locomotive"
 if [[ -f "$WRAPPER" ]]; then
   if [[ -w "$WRAPPER" ]]; then
     if rm "$WRAPPER"; then
@@ -60,19 +60,19 @@ else
 fi
 
 # === Check config directory ===
-log "Checking config station at ~/.config/loco..."
-if [[ -d "$HOME/.config/loco" ]]; then
-  if [[ -z "$(ls -A "$HOME/.config/loco")" ]]; then
-    if rmdir "$HOME/.config/loco"; then
-      log "Removed empty config directory $HOME/.config/loco"
+log "Checking config station at ~/.config/locomotive..."
+if [[ -d "$HOME/.config/locomotive" ]]; then
+  if [[ -z "$(ls -A "$HOME/.config/locomotive")" ]]; then
+    if rmdir "$HOME/.config/locomotive"; then
+      log "Removed empty config directory $HOME/.config/locomotive"
     else
-      log "Warning: Failed to remove empty $HOME/.config/loco"
+      log "Warning: Failed to remove empty $HOME/.config/locomotive"
     fi
   else
-    log "Note: $HOME/.config/loco contains files (e.g., non_games.conf), leaving intact"
+    log "Note: $HOME/.config/locomotive contains files (e.g., non_games.conf), leaving intact"
   fi
 else
-  log "Note: $HOME/.config/loco not found, skipping"
+  log "Note: $HOME/.config/locomotive not found, skipping"
 fi
 
 # === Final message ===

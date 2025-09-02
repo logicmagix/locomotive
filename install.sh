@@ -30,12 +30,12 @@ fi
 # === Install to ~/.local/bin ===
 log "Laying tracks to ~/.local/bin..."
 mkdir -p "$HOME/.local/bin"
-if ! cp loco "$HOME/.local/bin/loco"; then
+if ! cp loco "$HOME/.local/bin/locomotive"; then
   log "Error: Failed to copy loco to ~/.local/bin/loco"
   exit 1
 fi
 chmod 755 "$HOME/.local/bin/loco"
-log "Local installation complete! ~/.local/bin/loco is ready."
+log "Local installation complete! ~/.local/bin/locomotive is ready."
 
 # === Ensure ~/.local/bin is in PATH ===
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -45,10 +45,10 @@ fi
 
 # === Create /usr/local/bin wrapper ===
 log "Building station at /usr/local/bin..."
-WRAPPER="/usr/local/bin/loco"
+WRAPPER="/usr/local/bin/locomotive"
 WRAPPER_CONTENT="#!/usr/bin/env bash
 # Locomotive wrapper
-exec \"$HOME/.local/bin/loco\" \"\$@\""
+exec \"$HOME/.local/bin/locomotive\" \"\$@\""
 
 if [[ -w "/usr/local/bin" ]]; then
   if echo "$WRAPPER_CONTENT" > "$WRAPPER"; then
@@ -69,8 +69,8 @@ else
 fi
 
 # === Create config directory ===
-mkdir -p "$HOME/.config/loco"
-log "Config station ready at ~/.config/loco for non_games.conf"
+mkdir -p "$HOME/.config/locomotive"
+log "Config station ready at ~/.config/locomotive for non_games.conf"
 
 # === Final message ===
 cat <<'EOF'
