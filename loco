@@ -121,6 +121,7 @@ build_games_list() {
   local path app_dir manifest appid name
   # Known non-game AppIDs (Proton, Steam Linux Runtime, Steamworks Common)
   local -a non_games=(
+215
 1493710 
 1391110 
 1391112 
