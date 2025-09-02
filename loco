@@ -140,21 +140,21 @@ build_games_list() {
 1070560
 1628350
 1826330)
-  if [[ -f "$HOME/.config/loco/non_games.conf" ]]; then
+  if [[ -f "$HOME/.config/locomotive/non_games.conf" ]]; then
     if [[ -r "$HOME/.config/loco/non_games.conf" ]]; then
       local -a extra=()
-      mapfile -t extra < "$HOME/.config/loco/non_games.conf"
+      mapfile -t extra < "$HOME/.config/locomotive/non_games.conf"
       # Validate each entry as an integer
       for appid in "${extra[@]}"; do
         if [[ "$appid" =~ ^[0-9]+$ ]]; then
           non_games+=("$appid")
         else
-          echo "Warning: Invalid AppID '$appid' in $HOME/.config/loco/non_games.conf, skipping" >> /tmp/locomotive-debug.log
+          echo "Warning: Invalid AppID '$appid' in $HOME/.config/locomotive/non_games.conf, skipping" >> /tmp/locomotive-debug.log
         fi
       done
-      echo "Loaded ${#extra[@]} AppIDs from $HOME/.config/loco/non_games.conf" >> /tmp/locomotive-debug.log
+      echo "Loaded ${#extra[@]} AppIDs from $HOME/.config/locomotive/non_games.conf" >> /tmp/locomotive-debug.log
     else
-      echo "Warning: $HOME/.config/loco/non_games.conf exists but is not readable" >> /tmp/locomotive-debug.log
+      echo "Warning: $HOME/.config/locomotive/non_games.conf exists but is not readable" >> /tmp/locomotive-debug.log
     fi
   fi
   for path in "${paths[@]}"; do
