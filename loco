@@ -142,7 +142,7 @@ build_games_list() {
 1628350
 1826330)
   if [[ -f "$HOME/.config/locomotive/non_games.conf" ]]; then
-    if [[ -r "$HOME/.config/loco/non_games.conf" ]]; then
+    if [[ -r "$HOME/.config/locomotive/non_games.conf" ]]; then
       local -a extra=()
       mapfile -t extra < "$HOME/.config/locomotive/non_games.conf"
       # Validate each entry as an integer
