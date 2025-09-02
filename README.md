@@ -12,6 +12,7 @@ A command-line Steam launcher for Linux to browse and launch games with a interf
 - Browse Steam library using `less` (SPACE, b, j/k or arrow keys).
 - Launch games by number, quit with `q`.
 - Supports native Steam and Flatpak.
+- Keeps Steam UI minimized in the background *unless there are relevant messages or shader caching.
 - Truncates logs for clean runs.
 - Customizable non-game filtering via `~/.config/loco/non_games.conf`.
 - Train-themed ASCII art and messages.
