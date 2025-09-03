@@ -31,7 +31,7 @@ fi
 log "Laying tracks to ~/.local/bin..."
 mkdir -p "$HOME/.local/bin"
 if ! cp loco "$HOME/.local/bin/locomotive"; then
-  log "Error: Failed to copy loco to ~/.local/bin/loco"
+  log "Error: Failed to copy loco to ~/.local/bin/locomotive"
   exit 1
 fi
 chmod 755 "$HOME/.local/bin/loco"
