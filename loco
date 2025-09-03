@@ -274,7 +274,7 @@ EOF
               (SPACE/b or j/k).
         Enter q then game # to start
       Enter 'add' to add non-game AppID
-            Enter q again to quit
+             Enter q again to quit
 ================================================"
     echo
     for line in "${titles[@]}"; do printf '%s\n' "$line"; done
@@ -284,15 +284,10 @@ EOF
 # === Build the games list dynamically ===
 build_games_list
 
-# === Prompt for game selection with loop to handle Enter ===
+# === Prompt for game selection ===
 choice=""
 while true; do
-  if [[ -n "${choice:-}" ]]; then
-    read -rp "Make a selection (Enter = reuse $choice): " input
-    [[ -z "${input:-}" ]] && input="$choice"
-  else
     read -rp "Choose a destination: " input
-  fi
   echo "Input: '$input', Choice: '$choice'" >> /tmp/locomotive-debug.log
   if [[ -z "${input:-}" ]]; then
     display_menu
