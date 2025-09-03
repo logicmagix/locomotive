@@ -268,7 +268,7 @@ ____ ,_________ ,_____ ____     O      II    II
                                                
 ================================================
 EOF
-    echo "          == GAME LIBRARY MENU =="
+    echo "           == GAME LIBRARY MENU =="
     echo "
    Browse your game library with less commands
               (SPACE/b or j/k).
