@@ -105,7 +105,7 @@ add_non_game() {
     echo "Error: Failed to create directory $config_dir" >> /tmp/locomotive-debug.log
     return 1
   fi
-  # Ensure the file exists and is writable
+  # === Ensure the file exists and is writable ===
   if [[ ! -f "$config_file" ]]; then
     if ! touch "$config_file" 2>>/tmp/locomotive-debug.log; then
       echo "Error: Failed to create $config_file" >> /tmp/locomotive-debug.log
@@ -120,7 +120,7 @@ add_non_game() {
     echo "Error: $config_file is not writable" >> /tmp/locomotive-debug.log
     return 1
   fi
-  # Append AppID if not already present
+  # === Append AppID if not already present ===
   if ! grep -Fx "$appid" "$config_file" >/dev/null; then
     echo "$appid" >> "$config_file"
     echo "Added AppID $appid to $config_file" >> /tmp/locomotive-debug.log
@@ -166,7 +166,7 @@ build_games_list() {
   )
   local config_dir="$HOME/.config/locomotive"
   local config_file="$config_dir/non_games.conf"
-  # Ensure config directory exists
+  # === Ensure config directory exists ===
   if ! mkdir -p "$config_dir" 2>>/tmp/locomotive-debug.log; then
     echo "Error: Failed to create directory $config_dir" >> /tmp/locomotive-debug.log
     exit 1
