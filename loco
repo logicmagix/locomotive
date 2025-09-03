@@ -29,12 +29,12 @@ cat <<'EOF'
     ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░░▀░░▀▀▀
 ================================================
 EOF
-echo "           == CLI STEAM LAUNCHER =="
+echo "            == CLI STEAM LAUNCHER =="
 echo "
-        Press ENTER for Library menu.
-           Enter game # to start.
-      Enter 'add' to add non-game AppID.
-             Enter q to quit.
+         Press ENTER for Library menu.
+            Enter game # to start.
+       Enter 'add' to add non-game AppID.
+              Enter q to quit.
 ================================================"
 echo
 
