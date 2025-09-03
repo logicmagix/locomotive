@@ -29,7 +29,7 @@ cat <<'EOF'
     ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░░▀░░▀▀▀
 ================================================
 EOF
-echo "             == CLI STEAM LAUNCHER =="
+echo "            == CLI STEAM LAUNCHER =="
 echo "
           Press ENTER for Library menu.
              Enter game # to start.
