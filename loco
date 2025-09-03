@@ -203,7 +203,7 @@ build_games_list() {
       name="$(awk -F'"' '/"name"/ {print $4; exit}' "$manifest")"
       echo "Found manifest: $manifest, AppID: $appid, Name: $name" >> /tmp/locomotive-debug.log
       if [[ -n "${appid:-}" && -n "${name:-}" ]]; then
-        if [[ " ${non_games[*]} " =~ " ${appid} " || "$name" =~ [Ss][Tt][Ee][Aa][Mm][Ww][Oo][Rr][Kk][Ss] || "$name" =~ [Ss][Oo][Uu][Rr][Cc][Ee].*[Ss][Dd][Kk] ]]; then
+        if [[ " ${non_games[*]} " =~ " ${appid} " || "$name" =~ [Ss][Tt][Ee][Aa][Mm][Ww][Oo][Rr][Kk][Ss] || "$name" =~ [Ss][Dd][Kk] ]];then
           echo "Filtering non-game AppID: $appid, Name: $name" >> /tmp/locomotive-debug.log
           add_non_game "$appid"
         else
