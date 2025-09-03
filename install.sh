@@ -17,13 +17,13 @@ cat <<'EOF'
     ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░░▀░░▀▀▀    
 ================================================
 Locomotive Installer
-All aboard! Installing loco to ~/.local/bin and /usr/local/bin
+All aboard! Installing locomotive to ~/.local/bin and /usr/local/bin
 ============================================
 EOF
 
-# === Check for loco.sh ===
+# === Check for locomotive binary ===
 if [[ ! -f "loco" ]]; then
-  log "Error: File 'loco' not found in current directory"
+  log "Error: File 'locomotive' not found in current directory"
   exit 1
 fi
 
@@ -31,7 +31,7 @@ fi
 log "Laying tracks to ~/.local/bin..."
 mkdir -p "$HOME/.local/bin"
 if ! cp loco "$HOME/.local/bin/locomotive"; then
-  log "Error: Failed to copy loco to ~/.local/bin/locomotive"
+  log "Error: Failed to copy locomotive to ~/.local/bin/locomotive"
   exit 1
 fi
 chmod 755 "$HOME/.local/bin/locomotive"

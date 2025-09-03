@@ -18,7 +18,7 @@ cat <<'EOF'
     ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░░▀░░▀▀▀    
 ================================================
 Locomotive Uninstaller
-All aboard for departure! Removing loco from ~/.local/bin and /usr/local/bin
+All aboard for departure! Removing locomotive from ~/.local/bin and /usr/local/bin
 ============================================
 EOF
 
