@@ -14,9 +14,9 @@ A command-line Steam launcher for Linux to browse and launch games with a interf
 - Supports native Steam and Flatpak.
 - Keeps Steam UI minimized in the background *unless there are relevant messages or shader caching.
 - Truncates logs for clean runs.
-- Customizable non-game filtering via `~/.config/loco/non_games.conf`.
+- Customizable non-game filtering via `~/.config/locomotive/non_games.conf`.
 - Train-themed ASCII art and messages.
-- Launch your favorites quickly with the command `loco` followed by your favorite games ID number e.g. loco 42.
+- Launch your favorites quickly with the command `locomotive` followed by your favorite games ID number e.g. locomotive 42.
 - Game ID matches the games position in the library menu.
 
 ## Requirements
@@ -25,8 +25,8 @@ A command-line Steam launcher for Linux to browse and launch games with a interf
 - **Steam**: Native or Flatpak (`com.valvesoftware.Steam`)
 
 ## Installation
-- git clone https://github.com/logicmagix/loco
-- cd ...loco/ and chmod +x install.sh
+- git clone https://github.com/logicmagix/locomotive
+- cd ...locomotive/ and chmod +x install.sh
 - Run ./install.sh
 
 ## Uninstallation
@@ -41,10 +41,10 @@ A command-line Steam launcher for Linux to browse and launch games with a interf
 5. Press Enter to reuse the last selection or reopen the menu.
 
 ## Customization
-- **Non-Game Filtering**: Add AppIDs of non-game entries (e.g., tools, DLCs) to `~/.config/loco/non_games.conf`, one integer per line. Example:
+- **Non-Game Filtering**: Add AppIDs of non-game entries (e.g., tools, DLCs) to `~/.config/locomotive/non_games.conf`, one integer per line. Example:
   ```bash
-  echo "1234567" > ~/.config/loco/non_games.conf
-  echo "7654321" >> ~/.config/loco/non_games.conf
+  echo "1234567" > ~/.config/locomotive/non_games.conf
+  echo "7654321" >> ~/.config/locomotive/non_games.conf
 
 ## Screenshots
 
