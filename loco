@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # Locomotive - A CLI Steam game launcher
 # Copyright (C) 2025 Pavle Dzakula
 #
@@ -15,9 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 # shellcheck disable=SC2155
+
 # === Truncate Log ===
 : > /tmp/locomotive-debug.log
 : > /tmp/locomotive-launch.log
+
 # === Header ===
 cat <<'EOF'
 ================================================
@@ -34,15 +37,19 @@ echo "
              Enter q to quit.
 ================================================"
 echo
+
 # === Error handling ===
 set -euo pipefail
+
 # === Make unmatched globs vanish ===
 shopt -s nullglob
+
 # === Global menu structures ===
 declare -ga titles=()
 declare -gA ID=()
 declare -ga STEAM_CMD=()
 have() { command -v "$1" >/dev/null 2>&1; }
+
 # === Choose native Steam or Flatpak ===
 steam_cmd() {
   if have steam; then
@@ -58,6 +65,7 @@ steam_cmd() {
   echo "Error: Steam not found (native or flatpak)" >&2
   exit 1
 }
+
 # === Determine Steam directory ===
 get_steam_dir() {
   if have steam; then
@@ -77,6 +85,7 @@ get_steam_dir() {
   echo "Error: Unable to determine Steam directory" >&2
   exit 1
 }
+
 # === Determine paths ===
 get_library_paths() {
   local vdf_file="$1/steamapps/libraryfolders.vdf"
@@ -119,6 +128,7 @@ add_non_game() {
     echo "AppID $appid already in $config_file" >> /tmp/locomotive-debug.log
   fi
 }
+
 # === Build game library ===
 build_games_list() {
   local steam_dir
@@ -223,6 +233,7 @@ build_games_list() {
   fi
   echo "Built library with ${#titles[@]} entries" >> /tmp/locomotive-debug.log
 }
+
 # === Launch ===
 launch() {
   local appid="$1"
@@ -239,6 +250,7 @@ launch() {
   echo "Checking tickets... AppID for $game_name is $appid"
   echo "Itinerary written to /tmp/locomotive-launch.log"
 }
+
 # === Menu (less) ===
 display_menu() {
   {
@@ -268,8 +280,10 @@ EOF
     for line in "${titles[@]}"; do printf '%s\n' "$line"; done
   } | less -R -X
 }
+
 # === Build the games list dynamically ===
 build_games_list
+
 # === Prompt for game selection with loop to handle Enter ===
 choice=""
 while true; do
@@ -277,7 +291,7 @@ while true; do
     read -rp "Make a selection (Enter = reuse $choice): " input
     [[ -z "${input:-}" ]] && input="$choice"
   else
-    read -rp "Make a selection (q to quit, add to add AppID): " input
+    read -rp "Choose a destination: " input
   fi
   echo "Input: '$input', Choice: '$choice'" >> /tmp/locomotive-debug.log
   if [[ -z "${input:-}" ]]; then
@@ -306,12 +320,14 @@ while true; do
   fi
   break
 done
+
 # === Get AppID ===
 appid="${ID[$choice]:-}"
 if [[ -z "$appid" ]]; then
   echo "No APPID found for selection $choice" >&2
   exit 1
 fi
+
 # === Debug log ===
 {
   echo "Choice: $choice"
@@ -319,10 +335,12 @@ fi
   echo "Steam cmd: ${STEAM_CMD[*]}"
   echo "Steam dir: $(get_steam_dir)"
 } >> /tmp/locomotive-debug.log
+
 # === Get game name; strip leading number and dot ===
 game_name="${titles[$((choice-1))]}"
 game_name="${game_name#[0-9]*. }"
 echo "Stripped game_name: $game_name" >> /tmp/locomotive-debug.log
+
 # === Launch the game ===
 launch "$appid"
 echo "Locomotive steam engine is running.. Choo Choo! Next stop: $game_name"
