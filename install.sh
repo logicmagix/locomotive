@@ -34,7 +34,7 @@ if ! cp loco "$HOME/.local/bin/locomotive"; then
   log "Error: Failed to copy loco to ~/.local/bin/locomotive"
   exit 1
 fi
-chmod 755 "$HOME/.local/bin/loco"
+chmod 755 "$HOME/.local/bin/locomotive"
 log "Local installation complete! ~/.local/bin/locomotive is ready."
 
 # === Ensure ~/.local/bin is in PATH ===
