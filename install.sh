@@ -88,7 +88,7 @@ ____ ,_________ ,_____  ____    O      II    II
                                                 
 ================================================
 Your train has arrived at the station.
-Run 'loco' to start the Locomotive.
+Run 'locomotive' to start journey.
 Check /tmp/locomotive-install.log for details.
 All aboard!
 ============================================
