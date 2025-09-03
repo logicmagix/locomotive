@@ -9,10 +9,11 @@
 A command-line Steam launcher for Linux to browse and launch games with a interface.
 
 ## Features
+- Add non-games with `add` command *AppID is displayed when launching the game*
 - Browse Steam library using `less` (SPACE, b, j/k or arrow keys).
 - Launch games by number, quit with `q`.
 - Supports native Steam and Flatpak.
-- Keeps Steam UI minimized in the background *unless there are relevant messages or shader caching.
+- Keeps Steam UI minimized in the background *unless there are relevant messages or shader caching.*
 - Truncates logs for clean runs.
 - Customizable non-game filtering via `~/.config/locomotive/non_games.conf`.
 - Train-themed ASCII art and messages.
@@ -38,10 +39,11 @@ A command-line Steam launcher for Linux to browse and launch games with a interf
 2. Press Enter to view the game library menu.
 3. Navigate with SPACE/j (down), b/k (up), q (exit menu).
 4. Enter a game number to launch or `q` to quit.
-5. Press Enter to reuse the last selection or reopen the menu.
+5. Press Enter reopen the menu.
+6. Use the `add` command to add non-games or hide games.
 
 ## Customization
-- **Non-Game Filtering**: Add AppIDs of non-game entries (e.g., tools, DLCs) to `~/.config/locomotive/non_games.conf`, one integer per line or use the `add` command in the Locomotive interface.
+- **Non-Game Filtering**: Add AppIDs of non-game entries (e.g., tools, DLCs) to `~/.config/locomotive/non_games.conf`, one integer per line or use the `add` command in the Locomotive interface. AppID is displayed on launch.
 
 ## Screenshots
 
