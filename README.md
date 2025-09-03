@@ -34,17 +34,14 @@ A command-line Steam launcher for Linux to browse and launch games with a interf
 - ./uninstall.sh
 
 ## Usage
-1. Run `loco`.
+1. Run `locomotive`.
 2. Press Enter to view the game library menu.
 3. Navigate with SPACE/j (down), b/k (up), q (exit menu).
 4. Enter a game number to launch or `q` to quit.
 5. Press Enter to reuse the last selection or reopen the menu.
 
 ## Customization
-- **Non-Game Filtering**: Add AppIDs of non-game entries (e.g., tools, DLCs) to `~/.config/locomotive/non_games.conf`, one integer per line. Example:
-  ```bash
-  echo "1234567" > ~/.config/locomotive/non_games.conf
-  echo "7654321" >> ~/.config/locomotive/non_games.conf
+- **Non-Game Filtering**: Add AppIDs of non-game entries (e.g., tools, DLCs) to `~/.config/locomotive/non_games.conf`, one integer per line or use the `add` command in the Locomotive interface.
 
 ## Screenshots
 
