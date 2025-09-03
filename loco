@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # Locomotive - A CLI Steam game launcher
 # Copyright (C) 2025 Pavle Dzakula
 #
@@ -29,12 +28,12 @@ cat <<'EOF'
     ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░░▀░░▀▀▀
 ================================================
 EOF
-echo " == CLI STEAM LAUNCHER =="
+echo "           == CLI STEAM LAUNCHER =="
 echo "
-          Press ENTER for Library menu.
-              Enter game # to start.
-          Enter 'add' to add non-game AppID.
-                 Enter q to quit.
+        Press ENTER for Library menu.
+            Enter game # to start.
+      Enter 'add' to add non-game AppID.
+              Enter q to quit.
 ================================================"
 echo
 
@@ -54,10 +53,12 @@ have() { command -v "$1" >/dev/null 2>&1; }
 steam_cmd() {
   if have steam; then
     STEAM_CMD=(steam)
+    echo "Using native Steam" >> /tmp/locomotive-debug.log
     return
   fi
   if have flatpak && flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
     STEAM_CMD=(flatpak run com.valvesoftware.Steam)
+    echo "Using Flatpak Steam" >> /tmp/locomotive-debug.log
     return
   fi
   echo "Error: Steam not found (native or flatpak)" >&2
@@ -100,10 +101,20 @@ add_non_game() {
   local config_dir="$HOME/.config/locomotive"
   local config_file="$config_dir/non_games.conf"
   # Ensure the directory exists
-  mkdir -p "$config_dir"
+  if ! mkdir -p "$config_dir" 2>>/tmp/locomotive-debug.log; then
+    echo "Error: Failed to create directory $config_dir" >> /tmp/locomotive-debug.log
+    return 1
+  fi
+  # Ensure the file exists and is writable
   if [[ ! -f "$config_file" ]]; then
-    touch "$config_file" 2>>/tmp/locomotive-debug.log
-    chmod u+rw "$config_file" 2>>/tmp/locomotive-debug.log
+    if ! touch "$config_file" 2>>/tmp/locomotive-debug.log; then
+      echo "Error: Failed to create $config_file" >> /tmp/locomotive-debug.log
+      return 1
+    fi
+    if ! chmod u+rw "$config_file" 2>>/tmp/locomotive-debug.log; then
+      echo "Error: Failed to set permissions on $config_file" >> /tmp/locomotive-debug.log
+      return 1
+    fi
   fi
   if [[ ! -w "$config_file" ]]; then
     echo "Error: $config_file is not writable" >> /tmp/locomotive-debug.log
@@ -122,13 +133,15 @@ add_non_game() {
 build_games_list() {
   local steam_dir
   steam_dir="$(get_steam_dir)"
+  echo "Steam directory: $steam_dir" >> /tmp/locomotive-debug.log
   titles=()
   ID=()
   local -a paths=()
   readarray -t paths < <(get_library_paths "$steam_dir")
+  echo "Found ${#paths[@]} library paths" >> /tmp/locomotive-debug.log
   declare -A games_map=()
   local path app_dir manifest appid name
-  # Known non-game AppIDs (Proton, Steam Linux Runtime, Steamworks Common)
+  # Known non-game AppIDs (Proton, Steam Linux Runtime, Steamworks Common, Source SDK)
   local -a non_games=(
     215
     1493710
@@ -154,7 +167,10 @@ build_games_list() {
   local config_dir="$HOME/.config/locomotive"
   local config_file="$config_dir/non_games.conf"
   # Ensure config directory exists
-  mkdir -p "$config_dir"
+  if ! mkdir -p "$config_dir" 2>>/tmp/locomotive-debug.log; then
+    echo "Error: Failed to create directory $config_dir" >> /tmp/locomotive-debug.log
+    exit 1
+  fi
   if [[ -f "$config_file" && -r "$config_file" ]]; then
     local -a extra=()
     mapfile -t extra < "$config_file"
@@ -168,22 +184,34 @@ build_games_list() {
     echo "Loaded ${#extra[@]} AppIDs from $config_file" >> /tmp/locomotive-debug.log
   else
     echo "No $config_file found or not readable, creating empty file" >> /tmp/locomotive-debug.log
-    touch "$config_file" 2>>/tmp/locomotive-debug.log
-    chmod u+rw "$config_file" 2>>/tmp/locomotive-debug.log
+    if ! touch "$config_file" 2>>/tmp/locomotive-debug.log; then
+      echo "Error: Failed to create $config_file" >> /tmp/locomotive-debug.log
+      exit 1
+    fi
+    if ! chmod u+rw "$config_file" 2>>/tmp/locomotive-debug.log; then
+      echo "Error: Failed to set permissions on $config_file" >> /tmp/locomotive-debug.log
+      exit 1
+    fi
   fi
   for path in "${paths[@]}"; do
     app_dir="$path/steamapps"
     [[ -d "$app_dir" ]] || continue
+    echo "Processing app directory: $app_dir" >> /tmp/locomotive-debug.log
     for manifest in "$app_dir"/appmanifest_*.acf; do
       [[ -f "$manifest" ]] || continue
       appid="$(awk -F'"' '/"appid"/ {print $4; exit}' "$manifest")"
       name="$(awk -F'"' '/"name"/ {print $4; exit}' "$manifest")"
+      echo "Found manifest: $manifest, AppID: $appid, Name: $name" >> /tmp/locomotive-debug.log
       if [[ -n "${appid:-}" && -n "${name:-}" ]]; then
-        if [[ " ${non_games[*]} " =~ " $appid " || "$name" =~ [Ss][Tt][Ee][Aa][Mm][Ww][Oo][Rr][Kk][Ss] ]]; then
-          add_non_game "$appid"  # Add to non_games.conf
+        if [[ " ${non_games[*]} " =~ " ${appid} " || "$name" =~ [Ss][Tt][Ee][Aa][Mm][Ww][Oo][Rr][Kk][Ss] || "$name" =~ [Ss][Oo][Uu][Rr][Cc][Ee].*[Ss][Dd][Kk] ]]; then
+          echo "Filtering non-game AppID: $appid, Name: $name" >> /tmp/locomotive-debug.log
+          add_non_game "$appid"
         else
+          echo "Adding game: $name, AppID: $appid" >> /tmp/locomotive-debug.log
           games_map["$name"]="$appid"
         fi
+      else
+        echo "Skipping invalid manifest: $manifest (appid: $appid, name: $name)" >> /tmp/locomotive-debug.log
       fi
     done
   done
@@ -231,21 +259,21 @@ display_menu() {
 ================================================
                                       <<<<oooooo
                                      <<_________
- o o o Choo Choo o o O O II II
-____ ,_________ ,_____ ____ O II II
-...| |........| |.,.,.\_|[]|_'__Y __II____II_
-.I.|_|I.I.I.I.|_|.I.I.I.|__|_|II|} I..........
+ o  o  o  Choo Choo  o  o O  O         II    II 
+____ ,_________ ,_____  ____    O      II    II 
+...| |........| |.,.,.\_|[]|_'__Y    __II____II_
+.I.|_|I.I.I.I.|_|.I.I.I.|__|_|II|}   I..........
 =00==/00/==/00/=00--00==00--000\\==/==/==/==/==/
 /==/==/==/==/==/==/==/==/==/==/==/==/==/==/==/==
-                                               
+                                                
 ================================================
 EOF
-    echo " == GAME LIBRARY MENU =="
+    echo "           == GAME LIBRARY MENU =="
     echo "
   Browse your game library with less commands
               (SPACE/b or j/k).
-         Enter q then game # to start
-         Enter 'add' to add non-game AppID
+        Enter q then game # to start
+      Enter 'add' to add non-game AppID
             Enter q again to quit
 ================================================"
     echo
@@ -263,10 +291,12 @@ while true; do
     read -rp "Make a selection (Enter = reuse $choice): " input
     [[ -z "${input:-}" ]] && input="$choice"
   else
-    read -rp "Make a selection (q to quit, add to add AppID): " input
+    read -rp "Select destination: " input
   fi
+  echo "Input: '$input', Choice: '$choice'" >> /tmp/locomotive-debug.log
   if [[ -z "${input:-}" ]]; then
     display_menu
+    choice=""  # Reset choice to allow menu display
     continue
   fi
   choice="$input"
@@ -282,6 +312,7 @@ while true; do
     else
       echo "Invalid AppID, must be numeric" >&2
     fi
+    choice=""  # Reset choice to allow menu display after add
     continue
   elif [[ ! "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#titles[@]} )); then
     echo "Invalid selection, try again." >&2
