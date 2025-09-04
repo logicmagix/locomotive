@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # === Locomotive Uninstaller ===
-# Removes loco from ~/.local/bin and /usr/local/bin
+# Removes locomotive from ~/.local/bin and /usr/local/bin
 
 set -euo pipefail
 
@@ -22,7 +22,7 @@ All aboard for departure! Removing locomotive from ~/.local/bin and /usr/local/b
 ============================================
 EOF
 
-# === Remove ~/.local/bin/loco ===
+# === Remove ~/.local/bin/locomotive ===
 log "Clearing tracks at ~/.local/bin/locomotive..."
 if [[ -f "$HOME/.local/bin/locomotive" ]]; then
   if rm "$HOME/.local/bin/locomotive"; then

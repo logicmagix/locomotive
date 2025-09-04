@@ -22,7 +22,7 @@ All aboard! Installing locomotive to ~/.local/bin and /usr/local/bin
 EOF
 
 # === Check for locomotive binary ===
-if [[ ! -f "loco" ]]; then
+if [[ ! -f "locomotive.sh" ]]; then
   log "Error: File 'locomotive' not found in current directory"
   exit 1
 fi
@@ -30,7 +30,7 @@ fi
 # === Install to ~/.local/bin ===
 log "Laying tracks to ~/.local/bin..."
 mkdir -p "$HOME/.local/bin"
-if ! cp loco "$HOME/.local/bin/locomotive"; then
+if ! cp locomotive.sh "$HOME/.local/bin/locomotive"; then
   log "Error: Failed to copy locomotive to ~/.local/bin/locomotive"
   exit 1
 fi
