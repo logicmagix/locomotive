@@ -240,7 +240,7 @@ launch() {
   steam_cmd
 
   # Desired UI scale (fractional OK). Override by exporting L42_SCALE=... before running.
-  local SCALE="${L42_SCALE:-1.5}"
+  local SCALE="${L42_SCALE:-1}"
 
   # GTK notes:
   # - GDK_SCALE is integer-only (1,2,3…)
