@@ -2,7 +2,19 @@
 
 # Locomotive - A CLI Steam game launcher
 # Copyright (C) 2025 Pavle Dzakula
-# See LICENSE for details
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 # shellcheck disable=SC2155
 
 # === Truncate Log ===
@@ -226,18 +238,57 @@ build_games_list() {
 launch() {
   local appid="$1"
   steam_cmd
-  local -a args=()
+
+  # Desired UI scale (fractional OK). Override by exporting L42_SCALE=... before running.
+  local SCALE="${L42_SCALE:-1.5}"
+
+  # GTK notes:
+  # - GDK_SCALE is integer-only (1,2,3…)
+  # - GDK_DPI_SCALE allows fractional scaling (1.25, 1.5, …)
+  local GDK_SCALE_VAL="1"
+  local GDK_DPI_VAL="$SCALE"
+  local QT_SCALE_VAL="$SCALE"
+
+  # Build the Steam URL and common args
+  local url="steam://rungameid/${appid}"
+  local common=(-silent)
+
+  # Native Steam (non-Flatpak)
   if [[ "${STEAM_CMD[0]}" == "steam" ]]; then
-    args=(-silent -forcedesktopscaling=1 "steam://rungameid/${appid}")
-    nohup "${STEAM_CMD[@]}" "${args[@]}" >/tmp/locomotive-launch.log 2>&1 &
+    nohup env \
+      GDK_SCALE="${GDK_SCALE_VAL}" \
+      GDK_DPI_SCALE="${GDK_DPI_VAL}" \
+      QT_SCALE_FACTOR="${QT_SCALE_VAL}" \
+      "${STEAM_CMD[@]}" "${common[@]}" "${url}" \
+      >/tmp/locomotive-launch.log 2>&1 &
+
   else
-    # Flatpak: propagate scaling via envs
-    args=(-silent "steam://rungameid/${appid}")
-    nohup env STEAM_FORCE_DESKTOPUI_SCALING=1 GDK_SCALE=1 GDK_DPI_SCALE=1 "${STEAM_CMD[@]}" "${args[@]}" >/tmp/locomotive-launch.log 2>&1 &
+    # Flatpak: inject envs INSIDE the sandbox via --env flags
+    local -a fp_prefix=()
+    local -a fp_app_and_args=()
+
+    if [[ "${STEAM_CMD[0]}" == "flatpak" && "${STEAM_CMD[1]}" == "run" ]]; then
+      fp_prefix=("${STEAM_CMD[0]}" "${STEAM_CMD[1]}")
+      fp_app_and_args=("${STEAM_CMD[@]:2}")
+    else
+      # Fallback: treat as prefix (rare custom wrappers)
+      fp_prefix=("${STEAM_CMD[@]}")
+      fp_app_and_args=()
+    fi
+
+    nohup "${fp_prefix[@]}" \
+      --env=GDK_SCALE="${GDK_SCALE_VAL}" \
+      --env=GDK_DPI_SCALE="${GDK_DPI_VAL}" \
+      --env=QT_SCALE_FACTOR="${QT_SCALE_VAL}" \
+      "${fp_app_and_args[@]}" \
+      "${common[@]}" "${url}" \
+      >/tmp/locomotive-launch.log 2>&1 &
   fi
-  echo "Checking tickets... AppID for $game_name is $appid"
+
+  echo "Checking tickets... AppID is ${appid}"
   echo "Itinerary written to /tmp/locomotive-launch.log"
 }
+
 
 # === Menu (less) ===
 display_menu() {
@@ -326,4 +377,4 @@ echo "Stripped game_name: $game_name" >> /tmp/locomotive-debug.log
 
 # === Launch the game ===
 launch "$appid"
-echo "Locomotive steam engine is running.. Choo Choo! Next stop: $game_name"
+echo "Locomotive steam engine is running.. Next stop: $game_name"
